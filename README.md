@@ -102,6 +102,12 @@ Run local multi-GPU ABC->D evaluation:
 bash examples/calvin/eval_files/run_calvin_eval_multigpu_local.sh
 ```
 
+Evaluate the 50k MoT adapter checkpoint used for the strongest reported run:
+
+```bash
+bash examples/calvin/eval_files/run_group_calvin_eval_steps50000.sh
+```
+
 Aggregate worker results:
 
 ```bash
@@ -125,6 +131,7 @@ Only the main execution entry points are listed here. A detailed description of 
 | Main training config | `examples/calvin/train_files/starvla_train_calvin.yaml` |
 | Main training launcher | `examples/calvin/train_files/run_calvin_train_qwen35_gr00t.sh` |
 | Multi-GPU evaluator | `examples/calvin/eval_files/run_calvin_eval_multigpu_local.sh` |
+| Best MoT checkpoint evaluator | `examples/calvin/eval_files/run_group_calvin_eval_steps50000.sh` |
 | Result aggregation | `examples/calvin/eval_files/aggregate_calvin_results.py` |
 | Main policy framework | `starVLA/model/framework/VLM4A/QwenGR00T.py` |
 | MoE/progress policy variants | `starVLA/model/framework/VLM4A/QwenGR00TMoE*.py` |

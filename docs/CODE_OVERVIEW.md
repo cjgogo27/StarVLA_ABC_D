@@ -76,6 +76,10 @@ Primary multi-GPU ABC->D evaluation launcher.
 
 Alternate launcher used for repeat/checkpoint-specific runs.
 
+### `examples/calvin/eval_files/run_group_calvin_eval_steps50000.sh`
+
+Convenience launcher for evaluating the 50k MoT adapter checkpoint used by the strongest reported run. The script keeps the local defaults used in this project but exposes `ROOT`, `REPO_ROOT`, `CKPT`, `NUM_SEQUENCES`, `BASE_PORT`, and dataset paths as environment-variable overrides.
+
 ### `examples/calvin/eval_files/aggregate_calvin_results.py`
 
 Aggregates per-worker `sequence_results.json` and `results.json` files into average chain length and Task 1-5 chain success rates.
