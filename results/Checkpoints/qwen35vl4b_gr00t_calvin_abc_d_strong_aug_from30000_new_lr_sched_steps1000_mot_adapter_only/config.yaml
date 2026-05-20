@@ -1,0 +1,81 @@
+datasets:
+  vla_data:
+    CoT_prompt: Your task is {instruction}. To identify the key objects for your task.
+      Locate their bounding boxes in [x1,y1,x2,y2] format.
+    data_mix: calvin_task_ABC_D
+    data_root_dir: /inspire/qb-ilm2/project/26summer-camp-10/public/inspire_shared/calvin_abc_d
+    dataset_py: lerobot_datasets
+    per_device_batch_size: 8
+    video_backend: torchvision_av
+framework:
+  action_model:
+    action_dim: 7
+    action_horizon: 8
+    action_model_type: DiT-B
+    add_pos_embed: true
+    diffusion_model_cfg:
+      cross_attention_dim: 2560
+      dropout: 0.2
+      final_dropout: true
+      interleave_self_attention: true
+      norm_type: ada_norm
+      num_layers: 16
+      output_dim: 1024
+      positional_embeddings: null
+    hidden_size: 1024
+    max_seq_len: 1024
+    noise_beta_alpha: 1.5
+    noise_beta_beta: 1.0
+    noise_s: 0.999
+    num_inference_timesteps: 4
+    num_target_vision_tokens: 32
+    num_timestep_buckets: 1000
+    repeated_diffusion_steps: 8
+    state_dim: 7
+  motion_adapter:
+    action_dim: 7
+    dropout: 0.1
+    enabled: true
+    hidden_dim: 512
+    history_window: 4
+    num_heads: 8
+    num_layers: 2
+    num_motion_tokens: 1
+    pass_state_to_action_head: false
+    state_dim: 8
+    use_action: true
+    use_state: true
+  name: QwenGR00T
+  qwenvl:
+    attn_implementation: flash_attention_2
+    base_vlm: /inspire/qb-ilm2/project/26summer-camp-10/public/two/Model/Qwen3.5-4B
+output_dir: ./results/Checkpoints/qwen35vl4b_gr00t_calvin_abc_d_strong_aug_from30000_new_lr_sched_steps1000_mot_adapter_only
+run_id: qwen35vl4b_gr00t_calvin_abc_d_strong_aug_from30000_new_lr_sched_steps1000_mot_adapter_only
+run_root_dir: ./results/Checkpoints
+seed: 42
+trainer:
+  eval_interval: 250
+  freeze_modules: qwen_vl_interface,action_model
+  gradient_clipping: 1.0
+  is_resume: false
+  learning_rate:
+    action_model: 0.0001
+    base: 0.0001
+    motion_adapter: 0.0001
+    qwen_vl_interface: 1.0e-05
+  logging_frequency: 100
+  lr_scheduler_type: cosine_with_min_lr
+  max_train_steps: 150000
+  num_warmup_steps: 5000
+  optimizer:
+    betas:
+    - 0.9
+    - 0.95
+    eps: 1.0e-08
+    weight_decay: 1.0e-08
+  pretrained_checkpoint: /inspire/qb-ilm2/project/26summer-camp-10/public/two/starVLA/results/Checkpoints/qwen35vl4b_gr00t_calvin_abc_d_strong_aug_from30000_new_lr_sched/checkpoints/steps_1000_pytorch_model.pt
+  save_interval: 5000
+  scheduler_specific_kwargs:
+    min_lr: 1.0e-06
+wandb_entity: your_wandb_entity
+wandb_project: starVLA_Calvin

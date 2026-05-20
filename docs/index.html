@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StarVLA ABC-D</title>
+  <meta name="description" content="Qwen3.5-VL + GR00T policy for CALVIN ABC to D long-horizon manipulation.">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #101820;
+      --muted: #34414d;
+      --soft: #eef3f2;
+      --paper: #f7f7f2;
+      --white: #ffffff;
+      --green: #1f6f66;
+      --green-2: #0e4f55;
+      --gold: #c99a3f;
+      --coral: #bd5b4b;
+      --line: rgba(16, 24, 32, 0.12);
+      --shadow: 0 24px 70px rgba(16, 24, 32, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.55;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .wrap {
+      width: min(1160px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(16, 24, 32, 0.88);
+      backdrop-filter: blur(16px);
+      color: white;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      min-height: 64px;
+      font-size: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+    }
+
+    .mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--gold), var(--green));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    }
+
+    .navlinks {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .navlinks a:hover { color: white; }
+
+    header {
+      color: white;
+      background:
+        linear-gradient(105deg, rgba(16, 24, 32, 0.94) 0%, rgba(14, 79, 85, 0.88) 48%, rgba(201, 154, 63, 0.24) 100%),
+        url("assets/calvin_abc_d/place_in_slider.gif") center / cover no-repeat;
+    }
+
+    .hero {
+      min-height: calc(100vh - 64px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.78fr);
+      gap: 44px;
+      align-items: center;
+      padding: 76px 0 64px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    h1 {
+      max-width: 820px;
+      margin: 20px 0 20px;
+      font-size: clamp(48px, 8vw, 92px);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: clamp(18px, 2vw, 23px);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      font-weight: 800;
+      background: white;
+      color: var(--ink);
+    }
+
+    .button.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .hero-card {
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-card img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-card .meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .hero-card .meta div {
+      padding: 16px;
+      background: rgba(16, 24, 32, 0.72);
+    }
+
+    .hero-card strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .hero-card span {
+      display: block;
+      margin-top: 7px;
+      color: rgba(255, 255, 255, 0.68);
+      font-size: 12px;
+    }
+
+    section {
+      padding: 78px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.55fr);
+      gap: 40px;
+      align-items: end;
+      margin-bottom: 34px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(32px, 4.6vw, 54px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1.2fr repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .metric {
+      position: relative;
+      overflow: hidden;
+      min-height: 128px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      box-shadow: 0 12px 30px rgba(16, 24, 32, 0.06);
+    }
+
+    .metric::after {
+      content: "";
+      position: absolute;
+      inset: auto -28px -44px auto;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: rgba(31, 111, 102, 0.12);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: clamp(30px, 4vw, 46px);
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .metric.primary {
+      color: white;
+      background: linear-gradient(135deg, var(--green-2), var(--green));
+    }
+
+    .metric.primary strong,
+    .metric.primary span { color: white; }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 12px 34px rgba(16, 24, 32, 0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      font-size: 15px;
+    }
+
+    th,
+    td {
+      padding: 15px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      background: #edf4f2;
+      color: var(--ink);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    td.num {
+      font-weight: 900;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .figure-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .figure-panel {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 12px 34px rgba(16, 24, 32, 0.08);
+    }
+
+    .figure-panel img {
+      width: 100%;
+      display: block;
+      background: white;
+    }
+
+    .figure-panel .caption {
+      padding: 14px 18px;
+      color: var(--muted);
+      font-size: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .tile {
+      display: grid;
+      grid-template-columns: minmax(180px, 240px) 1fr;
+      align-items: center;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 12px 34px rgba(16, 24, 32, 0.08);
+    }
+
+    .tile img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      image-rendering: auto;
+      background: var(--soft);
+      transition: transform 180ms ease;
+    }
+
+    .tile:hover img { transform: scale(1.025); }
+
+    .tile .text { padding: 16px; }
+
+    .tile h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+
+    .tile p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .method,
+    .axis,
+    .map-card {
+      min-height: 210px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 12px 34px rgba(16, 24, 32, 0.06);
+    }
+
+    .method .num,
+    .axis .num {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--soft);
+      color: var(--ink);
+      font-weight: 900;
+      margin-bottom: 18px;
+    }
+
+    .method h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .method p,
+    .axis p,
+    .map-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .axis-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .axis {
+      min-height: 260px;
+    }
+
+    .axis h3,
+    .map-card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .tag {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .matrix-card {
+      padding: 20px;
+      min-height: 180px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 12px 34px rgba(16, 24, 32, 0.06);
+    }
+
+    .matrix-card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .matrix-card ul,
+    .map-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .matrix-card li + li,
+    .map-card li + li { margin-top: 6px; }
+
+    .diagnosis {
+      display: grid;
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .diagnosis-card {
+      padding: 26px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: linear-gradient(135deg, var(--green-2), #14242d);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .diagnosis-card h3 {
+      margin: 0 0 12px;
+      font-size: 26px;
+    }
+
+    .diagnosis-card p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .failure-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .failure-item {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 16px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .failure-item strong {
+      color: var(--coral);
+    }
+
+    .failure-item span {
+      color: var(--muted);
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .code-panel {
+      padding: 24px;
+      border-radius: 8px;
+      background: #101820;
+      color: rgba(255, 255, 255, 0.86);
+      box-shadow: var(--shadow);
+      overflow: auto;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font: 14px/1.65 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    code {
+      font: inherit;
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .code-panel code {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: inherit;
+    }
+
+    footer {
+      padding: 44px 0;
+      background: #101820;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    footer a { color: white; font-weight: 700; }
+
+    @media (max-width: 960px) {
+      .hero,
+      .section-head,
+      .method-grid,
+      .axis-grid,
+      .matrix,
+      .diagnosis,
+      .map-grid { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(3, 1fr); }
+      .gallery { grid-template-columns: 1fr; }
+      .hero { min-height: auto; }
+    }
+
+    @media (max-width: 620px) {
+      .wrap { width: min(100% - 28px, 1160px); }
+      nav { align-items: flex-start; flex-direction: column; padding: 12px 0; }
+      .navlinks { gap: 12px; }
+      .metrics,
+      .gallery,
+      .tile,
+      .hero-card .meta,
+      .failure-item { grid-template-columns: 1fr; }
+      section { padding: 56px 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <nav>
+        <a class="brand" href="#"><span class="mark"></span><span>StarVLA ABC-D</span></a>
+        <div class="navlinks">
+          <a href="#results">Results</a>
+          <a href="#rollouts">Rollouts</a>
+          <a href="#study">Study</a>
+          <a href="#figures">Figures</a>
+          <a href="#method">Method</a>
+          <a href="#reproduce">Reproduce</a>
+          <a href="https://github.com/cjgogo27/StarVLA_ABC_D">GitHub</a>
+          <a href="https://huggingface.co/cjgogo">Hugging Face</a>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <header>
+    <div class="wrap">
+      <div class="hero">
+        <div>
+          <div class="eyebrow">CALVIN ABC->D long-horizon manipulation</div>
+          <h1>Empirical VLA study for unseen-environment robot control</h1>
+          <p class="subtitle">A StarVLA-based CALVIN ABC->D package aligned with our paper draft: baseline ablations, push-skill failure diagnosis, progress-aware remedies, rollout visualization, and reproducible training/evaluation scripts.</p>
+          <div class="actions">
+            <a class="button" href="https://github.com/cjgogo27/StarVLA_ABC_D">View Code</a>
+            <a class="button secondary" href="CALVIN_ABC_D_REPORT.md">Read Report</a>
+            <a class="button secondary" href="https://huggingface.co/cjgogo">Hugging Face</a>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <img src="assets/calvin_abc_d/place_in_slider.gif" alt="CALVIN place in slider rollout">
+          <div class="meta">
+            <div><strong>2.380</strong><span>average chain length</span></div>
+            <div><strong>1000</strong><span>eval sequences</span></div>
+            <div><strong>24.5%</strong><span>full-chain SR@5</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="results">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Best Result: Qwen3.5-4B + GR00T + MoT</h2>
+          <p class="lead">All numbers below are from <code>docs/eval_runs_summary.md</code>. The best 1000-sequence CALVIN ABC-&gt;D run is the MoT/state-fix variant, reaching 24.5% full-chain success and 2.380 average chain length.</p>
+        </div>
+        <div class="metrics">
+          <div class="metric primary"><strong>2.380</strong><span>Average chain length</span></div>
+          <div class="metric"><strong>77.3%</strong><span>SR@1</span></div>
+          <div class="metric"><strong>57.5%</strong><span>SR@2</span></div>
+          <div class="metric"><strong>44.5%</strong><span>SR@3</span></div>
+          <div class="metric"><strong>34.2%</strong><span>SR@4</span></div>
+          <div class="metric"><strong>24.5%</strong><span>SR@5</span></div>
+        </div>
+        <div style="height: 18px"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Model</th><th>#Seq</th><th>SR@1</th><th>SR@2</th><th>SR@3</th><th>SR@4</th><th>SR@5</th><th>Avg. Chain</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Qwen3.5-4B+GR00T (no aug)</td><td class="num">1000</td><td class="num">69.5%</td><td class="num">45.7%</td><td class="num">31.7%</td><td class="num">21.0%</td><td class="num">14.5%</td><td class="num">1.824</td></tr>
+              <tr><td>Qwen3.5-4B+PI</td><td class="num">1000</td><td class="num">62.6%</td><td class="num">41.1%</td><td class="num">26.3%</td><td class="num">17.2%</td><td class="num">11.8%</td><td class="num">1.590</td></tr>
+              <tr><td>Qwen3.5-4B+GR00T (strong aug)</td><td class="num">1000</td><td class="num">75.2%</td><td class="num">54.0%</td><td class="num">39.3%</td><td class="num">28.9%</td><td class="num">19.3%</td><td class="num">2.167</td></tr>
+              <tr><td>Qwen3.5-4B+GR00T+MoE</td><td class="num">1000</td><td class="num">72.1%</td><td class="num">49.4%</td><td class="num">33.9%</td><td class="num">22.8%</td><td class="num">15.0%</td><td class="num">1.932</td></tr>
+              <tr><td>Cosmos-Predict2-2B+PI</td><td class="num">1000</td><td class="num">36.0%</td><td class="num">11.2%</td><td class="num">3.0%</td><td class="num">0.5%</td><td class="num">0.1%</td><td class="num">0.508</td></tr>
+              <tr><td>Cosmos-Predict2-2B+PI+flare</td><td class="num">1000</td><td class="num">41.6%</td><td class="num">14.8%</td><td class="num">3.7%</td><td class="num">1.5%</td><td class="num">0.6%</td><td class="num">0.622</td></tr>
+              <tr><td><strong>Qwen3.5-4B+GR00T+MoT</strong></td><td class="num">1000</td><td class="num">77.3%</td><td class="num">57.5%</td><td class="num">44.5%</td><td class="num">34.2%</td><td class="num">24.5%</td><td class="num">2.380</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="study">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>What Changed Across Models</h2>
+          <p class="lead">The comparison shows three clear trends: Qwen3.5-based VLA routes outperform the current Cosmos-PI routes; strong augmentation improves GR00T substantially; the MoT/state-fix variant gives the best long-chain result.</p>
+        </div>
+        <div class="axis-grid">
+          <article class="axis"><div class="num">+0.343</div><h3>Strong Augmentation Gain</h3><p>GR00T improves from 1.824 to 2.167 average chain length, and SR@5 rises from 14.5% to 19.3%.</p><div class="tag-row"><span class="tag">visual shift</span><span class="tag">ABC-&gt;D</span></div></article>
+          <article class="axis"><div class="num">Best</div><h3>MoT / State-Fix Variant</h3><p>The strongest run reaches 2.380 average chain length and 24.5% full five-task success over 1000 sequences.</p><div class="tag-row"><span class="tag">Qwen3.5</span><span class="tag">GR00T</span><span class="tag">MoT</span></div></article>
+          <article class="axis"><div class="num">Gap</div><h3>PI Still Trails GR00T</h3><p>Qwen3.5+PI reaches 1.590 average chain length, while the GR00T family and MoT variant remain stronger on continuous CALVIN control.</p><div class="tag-row"><span class="tag">Qwen3.5</span><span class="tag">PI</span></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="figures">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Framework Figures</h2>
+          <p class="lead">The framework diagrams summarize the baseline routes and the two main training levers: action-head pre-training and visual augmentation.</p>
+        </div>
+        <div class="figure-stack">
+          <figure class="figure-panel"><img src="assets/figures/f2.png" alt="Baseline framework comparison"><figcaption class="caption">Baseline framework comparison across Qwen3.5 + GR00T, Qwen3.5 + PI-style action prediction, and Cosmos-Predict world-model conditioning.</figcaption></figure>
+          <figure class="figure-panel"><img src="assets/figures/f1.png" alt="Pretraining and augmentation framework"><figcaption class="caption">Action-head pre-training on LIBERO and compound visual augmentation for ABC-&gt;D generalization.</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="rollouts">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Representative Rollouts</h2>
+          <p class="lead">The best 1000-sequence MoT run was logged as result JSONs, while these videos come from the available GIF-logging evaluation run. They are used as qualitative success/failure examples for the same CALVIN ABC-&gt;D setting.</p>
+        </div>
+        <div class="gallery">
+          <article class="tile"><img src="assets/calvin_abc_d/push_into_drawer_success.gif" alt="Push into drawer success"><div class="text"><h3>Success: Push Into Drawer</h3><p>A contact-rich push succeeds when the object and drawer state provide enough progress signal.</p></div></article>
+          <article class="tile"><img src="assets/calvin_abc_d/lift_pink_block_table_success.gif" alt="Lift pink block table success"><div class="text"><h3>Success: Lift Block</h3><p>Grasping and lifting are more visually grounded than subtle push progress.</p></div></article>
+          <article class="tile"><img src="assets/calvin_abc_d/move_slider_right_success.gif" alt="Move slider right success"><div class="text"><h3>Success: Move Slider</h3><p>Articulated-object tasks often expose clearer visual milestones.</p></div></article>
+          <article class="tile"><img src="assets/calvin_abc_d/place_in_slider.gif" alt="Place in slider success"><div class="text"><h3>Success: Place in Slider</h3><p>Precise placement example from the saved rollout assets.</p></div></article>
+          <article class="tile"><img src="assets/calvin_abc_d/push_pink_block_right_failure.gif" alt="Push pink block right failure"><div class="text"><h3>Failure: Push Right</h3><p>Representative high-leverage failure family: contact happens but completion is ambiguous.</p></div></article>
+          <article class="tile"><img src="assets/calvin_abc_d/stack_block_failure.gif" alt="Stack block failure"><div class="text"><h3>Failure: Stack Block</h3><p>Stacking illustrates accumulated pose error in long-horizon chains.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="failure">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Worst-Action Breakdown</h2>
+          <p class="lead">The worst primitive actions are dominated by push and rotation tasks. The best MoT run improves overall chain length, but push actions remain the key bottleneck.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Model</th><th>Worst action 1</th><th>Worst action 2</th><th>Worst action 3</th><th>Worst action 4</th><th>Worst action 5</th></tr></thead>
+            <tbody>
+              <tr><td>GR00T (no aug)</td><td><code>push_pink_block_left</code> 15.2%</td><td><code>rotate_pink_block_right</code> 16.1%</td><td><code>rotate_red_block_left</code> 16.4%</td><td><code>push_red_block_right</code> 21.9%</td><td><code>move_slider_left</code> 28.7%</td></tr>
+              <tr><td>Qwen3.5+PI</td><td><code>move_slider_left</code> 4.2%</td><td><code>rotate_pink_block_right</code> 12.5%</td><td><code>push_pink_block_left</code> 16.1%</td><td><code>push_red_block_right</code> 23.7%</td><td><code>rotate_pink_block_left</code> 26.2%</td></tr>
+              <tr><td>GR00T (strong aug)</td><td><code>push_pink_block_left</code> 14.7%</td><td><code>push_red_block_right</code> 23.1%</td><td><code>rotate_pink_block_left</code> 23.4%</td><td><code>push_pink_block_right</code> 29.3%</td><td><code>push_blue_block_left</code> 30.0%</td></tr>
+              <tr><td>GR00T+MoE</td><td><code>move_slider_left</code> 18.5%</td><td><code>push_pink_block_left</code> 19.0%</td><td><code>push_red_block_right</code> 28.8%</td><td><code>push_blue_block_left</code> 31.0%</td><td><code>rotate_pink_block_left</code> 31.9%</td></tr>
+              <tr><td>Cosmos+PI</td><td><code>push_blue_block_right</code> 0.0%</td><td><code>push_pink_block_right</code> 0.0%</td><td><code>lift_pink_block_drawer</code> 0.0%</td><td><code>rotate_pink_block_right</code> 2.3%</td><td><code>lift_red_block_slider</code> 2.4%</td></tr>
+              <tr><td>Cosmos+PI+flare</td><td><code>lift_blue_block_slider</code> 0.0%</td><td><code>push_blue_block_right</code> 0.0%</td><td><code>push_red_block_right</code> 2.2%</td><td><code>lift_red_block_slider</code> 2.6%</td><td><code>push_pink_block_right</code> 2.9%</td></tr>
+              <tr><td><strong>GR00T+MoT</strong></td><td><code>push_pink_block_left</code> 17.6%</td><td><code>push_red_block_right</code> 23.4%</td><td><code>push_blue_block_right</code> 28.1%</td><td><code>push_pink_block_right</code> 31.0%</td><td><code>rotate_pink_block_left</code> 31.2%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="height: 18px"></div>
+        <div class="diagnosis">
+          <div class="diagnosis-card"><h3>Core diagnosis</h3><p>Progress awareness is the missing signal: push tasks change the scene gradually, so the policy can touch the block but still fail to know whether the subtask has advanced enough.</p></div>
+          <div class="failure-list">
+            <div class="failure-item"><strong>Early-chain sensitivity</strong><span>Failure at SR@1 or SR@2 sharply lowers average chain length and prevents later subtasks.</span></div>
+            <div class="failure-item"><strong>Push ambiguity</strong><span>Push-left/right remain low even in the best MoT run, confirming that progress cues matter.</span></div>
+            <div class="failure-item"><strong>Remedy path</strong><span>History context, progress prediction, future-frame conditioning, and RL rewards all target progress estimation.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reproduce">
+      <div class="wrap">
+        <div class="section-head"><h2>Reproduce</h2><p class="lead">Run training, evaluation, and aggregation from the repository root. We tested two Qwen3.5 action heads: PI-style unified action prediction and GR00T-style continuous action prediction.</p></div>
+        <div class="table-wrap" style="margin-bottom: 18px"><table><thead><tr><th>Action head</th><th>Train</th><th>Evaluate</th><th>Reported result root</th></tr></thead><tbody><tr><td>Qwen3.5 + PI</td><td><code>bash examples/calvin/train_files/run_calvin_train.sh</code></td><td><code>bash examples/calvin/eval_files/run_calvin_eval_8gpu_pi_abc_d_steps30000.sh</code></td><td><code>results/calvin_eval/qwen35vl4b_pi_calvin_abc_d_steps_30000_pytorch_model_multigpu_20260519_070133</code></td></tr><tr><td>Qwen3.5 + GR00T</td><td><code>bash examples/calvin/train_files/run_calvin_train_qwen35_gr00t.sh</code></td><td><code>bash examples/calvin/eval_files/run_calvin_eval_multigpu_local.sh</code></td><td><code>results/calvin_eval/baseline_strong_aug_steps30000_statefix1000_multigpu_20260520_031141</code></td></tr><tr><td>Aggregate</td><td colspan="2"><code>python examples/calvin/eval_files/aggregate_calvin_results.py --eval-root ...</code></td><td>Average chain length and SR@1-5 success rates</td></tr></tbody></table></div>
+        <div class="code-panel"><pre><code># Train and evaluate the Qwen3.5-PI action head
+bash examples/calvin/train_files/run_calvin_train.sh
+bash examples/calvin/eval_files/run_calvin_eval_8gpu_pi_abc_d_steps30000.sh
+
+# Train the main Qwen3.5-GR00T action head
+bash examples/calvin/train_files/run_calvin_train_qwen35_gr00t.sh
+
+# Run local multi-GPU ABC-&gt;D evaluation
+bash examples/calvin/eval_files/run_calvin_eval_multigpu_local.sh
+
+# Aggregate saved worker results
+python examples/calvin/eval_files/aggregate_calvin_results.py \
+  --eval-root results/calvin_eval/baseline_strong_aug_steps30000_statefix1000_multigpu_20260520_031141
+
+python examples/calvin/eval_files/aggregate_calvin_results.py \
+  --eval-root results/calvin_eval/qwen35vl4b_pi_calvin_abc_d_steps_30000_pytorch_model_multigpu_20260519_070133</code></pre></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      StarVLA ABC-D. Code: <a href="https://github.com/cjgogo27/StarVLA_ABC_D">github.com/cjgogo27/StarVLA_ABC_D</a>. Hugging Face: <a href="https://huggingface.co/cjgogo">huggingface.co/cjgogo</a>. Report: <a href="CALVIN_ABC_D_REPORT.md">CALVIN_ABC_D_REPORT.md</a>.
+    </div>
+  </footer>
+</body>
+</html>
