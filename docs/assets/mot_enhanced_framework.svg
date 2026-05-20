@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">MOT-enhanced QwenGR00T framework</title>
+  <desc id="desc">A framework diagram showing how the MOT adapter adds motion tokens between Qwen-VL hidden states and the GR00T flow-matching action head.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f3a4a"/>
+    </marker>
+    <marker id="arrowAccent" viewBox="0 0 10 10" refX="8.8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0b7a75"/>
+    </marker>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#1b2430" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #f7f8fb; }
+      .panel { fill: #ffffff; stroke: #d9dee8; stroke-width: 1.4; rx: 8; filter: url(#softShadow); }
+      .box { fill: #ffffff; stroke: #b8c0cc; stroke-width: 1.6; rx: 8; }
+      .boxMain { fill: #eef4ff; stroke: #4c6faf; stroke-width: 2; rx: 8; }
+      .boxMot { fill: #eaf8f5; stroke: #0b7a75; stroke-width: 2.2; rx: 8; }
+      .boxHead { fill: #fff4e8; stroke: #b76e1e; stroke-width: 2; rx: 8; }
+      .boxOut { fill: #f1eefb; stroke: #6f58b8; stroke-width: 2; rx: 8; }
+      .small { fill: #ffffff; stroke: #ccd3df; stroke-width: 1.4; rx: 6; }
+      .title { font: 700 30px Arial, sans-serif; fill: #172033; }
+      .subtitle { font: 400 15px Arial, sans-serif; fill: #526071; }
+      .label { font: 700 18px Arial, sans-serif; fill: #172033; }
+      .text { font: 400 14px Arial, sans-serif; fill: #344255; }
+      .tiny { font: 400 12px Arial, sans-serif; fill: #596679; }
+      .tag { font: 700 12px Arial, sans-serif; fill: #0b7a75; letter-spacing: 0.5px; }
+      .arrow { fill: none; stroke: #2f3a4a; stroke-width: 2.2; marker-end: url(#arrow); }
+      .arrowThin { fill: none; stroke: #687385; stroke-width: 1.8; marker-end: url(#arrow); }
+      .arrowMot { fill: none; stroke: #0b7a75; stroke-width: 2.6; marker-end: url(#arrowAccent); }
+      .dash { fill: none; stroke: #8a94a6; stroke-width: 1.6; stroke-dasharray: 6 6; marker-end: url(#arrow); }
+      .divider { stroke: #d9dee8; stroke-width: 1.2; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1280" height="720"/>
+
+  <text x="64" y="58" class="title">MOT-Enhanced QwenGR00T Framework</text>
+  <text x="64" y="84" class="subtitle">MOT adds a compact temporal-progress token before the GR00T action head; the VLM and action head remain compatible with the original StarVLA stack.</text>
+
+  <rect x="48" y="116" width="1184" height="540" class="panel"/>
+
+  <!-- Inputs -->
+  <text x="78" y="154" class="tag">INPUTS</text>
+  <rect x="74" y="176" width="190" height="74" class="small"/>
+  <text x="98" y="204" class="label">RGB observation</text>
+  <text x="98" y="228" class="tiny">image_t</text>
+
+  <rect x="74" y="278" width="190" height="74" class="small"/>
+  <text x="98" y="306" class="label">Instruction</text>
+  <text x="98" y="330" class="tiny">language command</text>
+
+  <rect x="74" y="418" width="190" height="82" class="small"/>
+  <text x="98" y="448" class="label">State history</text>
+  <text x="98" y="472" class="tiny">state_{t-K+1:t}</text>
+
+  <rect x="74" y="526" width="190" height="82" class="small"/>
+  <text x="98" y="556" class="label">Action history</text>
+  <text x="98" y="580" class="tiny">optional action_{t-K:t-1}</text>
+
+  <!-- VLM -->
+  <rect x="340" y="216" width="230" height="122" class="boxMain"/>
+  <text x="386" y="262" class="label">Qwen-VL Encoder</text>
+  <text x="376" y="290" class="text">vision-language grounding</text>
+  <text x="394" y="314" class="tiny">outputs hidden tokens h_vlm</text>
+
+  <!-- MOT -->
+  <rect x="340" y="444" width="230" height="128" class="boxMot"/>
+  <text x="388" y="488" class="label">MOT Adapter</text>
+  <text x="382" y="516" class="text">short-horizon motion</text>
+  <text x="374" y="540" class="tiny">Transformer over state/action history</text>
+
+  <!-- Motion token -->
+  <rect x="650" y="462" width="180" height="92" class="boxMot"/>
+  <text x="686" y="500" class="label">Motion Token</text>
+  <text x="682" y="526" class="tiny">m in Qwen hidden dim</text>
+
+  <!-- Fusion -->
+  <rect x="650" y="252" width="190" height="102" class="box"/>
+  <text x="705" y="290" class="label">Token Fusion</text>
+  <text x="686" y="318" class="text">h_aug = concat(h_vlm, m)</text>
+  <text x="694" y="340" class="tiny">sequence-dimension append</text>
+
+  <!-- Current state -->
+  <rect x="650" y="122" width="190" height="76" class="small"/>
+  <text x="694" y="152" class="label">Current State</text>
+  <text x="704" y="176" class="tiny">state_t, optional direct path</text>
+
+  <!-- Action head -->
+  <rect x="920" y="240" width="230" height="136" class="boxHead"/>
+  <text x="956" y="286" class="label">GR00T Flow Head</text>
+  <text x="954" y="314" class="text">flow-matching action model</text>
+  <text x="976" y="340" class="tiny">cross-attends to h_aug</text>
+
+  <!-- Output -->
+  <rect x="930" y="468" width="210" height="100" class="boxOut"/>
+  <text x="968" y="508" class="label">Action Chunk</text>
+  <text x="982" y="536" class="text">a_{t:t+H-1}</text>
+  <text x="996" y="558" class="tiny">continuous [T, 7]</text>
+
+  <!-- Arrows from inputs -->
+  <path d="M 264 213 C 292 213, 308 240, 340 250" class="arrowThin"/>
+  <path d="M 264 315 C 292 315, 308 300, 340 292" class="arrowThin"/>
+  <path d="M 264 459 C 294 459, 312 476, 340 488" class="arrowMot"/>
+  <path d="M 264 567 C 294 567, 312 540, 340 528" class="dash"/>
+
+  <!-- VLM to fusion -->
+  <path d="M 570 277 L 650 292" class="arrow"/>
+
+  <!-- MOT to motion token and fusion -->
+  <path d="M 570 508 L 650 508" class="arrowMot"/>
+  <path d="M 740 462 C 740 420, 740 388, 742 354" class="arrowMot"/>
+
+  <!-- Current state to action head -->
+  <path d="M 840 160 C 902 160, 912 222, 962 240" class="arrowThin"/>
+
+  <!-- Fusion to action head -->
+  <path d="M 840 306 L 920 306" class="arrow"/>
+
+  <!-- Head to output -->
+  <path d="M 1035 376 L 1035 468" class="arrow"/>
+
+  <!-- Notes -->
+  <line x1="884" y1="420" x2="1180" y2="420" class="divider"/>
+  <text x="920" y="438" class="tag">WHAT CHANGES AFTER MOT</text>
+  <text x="920" y="606" class="tiny">Original path: image + instruction + state -> QwenGR00T -> action chunk</text>
+  <text x="920" y="628" class="tiny">New path: history -> MOT adapter -> motion token -> action-head context</text>
+
+  <rect x="342" y="622" width="500" height="34" fill="#eef4ff" stroke="#c8d5ee" rx="6"/>
+  <text x="362" y="644" class="tiny">Inference cache maintains recent state/action history; training data loader emits state_history and optional action_history.</text>
+</svg>

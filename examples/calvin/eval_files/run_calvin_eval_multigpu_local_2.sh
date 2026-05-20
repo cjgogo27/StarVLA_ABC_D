@@ -13,7 +13,7 @@ set -euo pipefail
 REPO_ROOT=$(pwd)
 
 # 
-CKPT_PATH=${CKPT_PATH:-/inspire/qb-ilm2/project/26summer-camp-10/public/two/starVLA/results/Checkpoints/qwen35vl4b_gr00t_calvin_abc_d_strong_aug_from30000_new_lr_sched/checkpoints/steps_12000_pytorch_model.pt}
+CKPT_PATH=${CKPT_PATH:-/inspire/qb-ilm2/project/26summer-camp-10/public/two/starVLA/results/Checkpoints/qwen35vl4b_gr00t_moe_progress_calvin_abc_d_from_strong_aug/checkpoints/steps_8000_pytorch_model.pt}
 CALVIN_DATASET_PATH=${CALVIN_DATASET_PATH:-/inspire/qb-ilm2/project/26summer-camp-10/public/inspire_shared/calvin_d_d}
 CALVIN_ROOT=${CALVIN_ROOT:-/inspire/qb-ilm2/project/26summer-camp-10/public/two/calvin}
 STAR_VLA_PYTHON=${STAR_VLA_PYTHON:-/inspire/qb-ilm2/project/26summer-camp-10/public/two/miniconda/envs/starVLA2/bin/python}
